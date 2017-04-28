@@ -715,7 +715,7 @@ MySipInterface gSipInterface;	// Here it is.
 
 // Pat added to hook messages from the ORTP library.  See ortp_set_log_handler in ortp.c.
 extern "C" {
-	static void ortpLogFunc(OrtpLogLevel /*lev unused*/, const char *fmt, va_list args)
+	static void ortpLogFunc(const char* domain, OrtpLogLevel /*lev unused*/, const char *fmt, va_list args)
 	{
 		// This floods the system with error messages, so regulate output to the console.
 		static time_t lasttime = 0;	// No more than one message per minute.

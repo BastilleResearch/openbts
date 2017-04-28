@@ -31,8 +31,8 @@
 #include <netinet/tcp.h>		// pat added for tcphdr
 #include <netinet/udp.h>		// pat added for udphdr
 
-#include <linux/if.h>			// pat added.
-#include <linux/if_tun.h>			// pat added.
+//#include <linux/if.h>			// pat added.
+//#include <linux/if_tun.h>			// pat added.
 #include <sys/ioctl.h>			// pat added.	This defines NCC, which is bad, because used in GSMConfig.h
 #undef NCC	// Just in case you want to include GSM files later.
 #include <assert.h>				// pat added
@@ -40,7 +40,7 @@
 #include <sys/time.h>				// pat added.
 #include <time.h>				// pat added.
 #include <sys/types.h>
-#include <wait.h>
+//#include <wait.h>
 #include <ctype.h>
 #include "miniggsn.h"
 #include <Globals.h>		// for gConfig
@@ -187,24 +187,25 @@ static int set_ip_using(const char *name, int c, unsigned long ip)
 EXPORT void ip_hdr_dump(unsigned char *packet, const char *msg)
 {
 	struct iptcp {	// This is only accurate if no ip options specified.
-		struct iphdr ip;
+		//struct iphdr ip;
+        struct ip iph;
 		struct tcphdr tcp;
 	};
 	struct iptcp *pp = (struct iptcp*)packet;
 	char nbuf[100];
 	printf("%s: ",msg);
-	printf("%d bytes protocol=%d saddr=%s daddr=%s version=%d ihl=%d tos=%d id=%d\n",
-		ntohs(pp->ip.tot_len),pp->ip.protocol,ip_ntoa(pp->ip.saddr,nbuf),ip_ntoa(pp->ip.daddr,NULL),
-		pp->ip.version,pp->ip.ihl,pp->ip.tos, ntohs(pp->ip.id));
+/*	printf("%d bytes protocol=%d saddr=%s daddr=%s version=%d ihl=%d tos=%d id=%d\n",
+		ntohs(pp->iph.tot_len),pp->iph.protocol,ip_ntoa(pp->iph.saddr,nbuf),ip_ntoa(pp->iph.daddr,NULL),
+		pp->iph.version,pp->iph.ihl,pp->iph.tos, ntohs(pp->iph.id));
 	printf("\tcheck=%d computed=%d frag=%d ttl=%d\n",
-		pp->ip.check,ip_checksum(packet,sizeof(struct iphdr),NULL),
-		ntohs(pp->ip.frag_off),pp->ip.ttl);
+		pp->iph.check,ip_checksum(packet,sizeof(struct iphdr),NULL),
+		ntohs(pp->iph.frag_off),pp->iph.ttl);
 	printf("\ttcp SYN=%d ACK=%d FIN=%d RES=%d sport=%u dport=%u\n",
 		pp->tcp.syn,pp->tcp.ack,pp->tcp.fin,pp->tcp.rst,
 		ntohs(pp->tcp.source),ntohs(pp->tcp.dest));
 	printf("\t\tseq=%u ackseq=%u window=%u check=%u\n",
 		ntohl(pp->tcp.seq),ntohl(pp->tcp.ack_seq),htons(pp->tcp.window),htons(pp->tcp.check));
-}
+*/}
 
 // Run the command.
 // This is not ip specific, but used to call linux "ip" and "route" commands.
@@ -286,8 +287,8 @@ EXPORT int runcmd(const char *path, ...)
 // The addrstr is the tunnel address and must include the mask, eg: "192.168.2.0/24"
 EXPORT int ip_tun_open(const char *tname, const char *addrstr) // int32_t ipaddr, int maskbits)
 {
-	struct ifreq ifr;
-	int fd;
+    int fd = -1;
+/*	struct ifreq ifr;
 	const char *clonedev = "/dev/net/tun";
 	if ((fd = open(clonedev,O_RDWR)) < 0) {
 		// Hmmph.  Try to create the tunnel device.
@@ -312,16 +313,16 @@ EXPORT int ip_tun_open(const char *tname, const char *addrstr) // int32_t ipaddr
 	if (ioctl(fd,TUNSETPERSIST,1) < 0) {
 		MGERROR("could not setpersist tunnel %s: ioctl error: %s\n",tname,strerror(errno));
 	}
-
+*/
 	// This (and only this) magic works:
 	// We invoke with:
 	// ./miniggsn -v -t 192.168.1.75/32 -f 192.168.1.75 router
 	// or: ./miniggsn -v -t 192.168.2.0/24 -f 192.168.2.1 router
-	runcmd("/sbin/ip","ip","link","set",tname,"up",NULL);
+//	runcmd("/sbin/ip","ip","link","set",tname,"up",NULL);
 	// TODO: Instead of individual routes, we can also do:
 	// ip route add to 192.168.3.0/24 dev mstun  # Note you must use .0, not .1
 	//runcmd("/sbin/ip","ip","route","add","to",options.from,"dev",tname,NULL);
-	runcmd("/sbin/ip","ip","route","add","to",addrstr,"dev",tname,NULL);
+//	runcmd("/sbin/ip","ip","route","add","to",addrstr,"dev",tname,NULL);
 	// Establishing a "forwarding route" causes linux proxy-arp to automagically add an ARP
 	// for mstun, even though it has the "NOARP" option set.  What a mess.
 

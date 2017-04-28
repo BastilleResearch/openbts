@@ -94,15 +94,15 @@
 #include <netinet/tcp.h>		// pat added for tcphdr
 #include <netinet/udp.h>		// pat added for udphdr
 
-#include <linux/if.h>			// pat added.
-#include <linux/if_tun.h>			// pat added.
+//#include <linux/if.h>			// pat added.
+//#include <linux/if_tun.h>			// pat added.
 //#include <sys/ioctl.h>			// pat added, then removed because it defines NCC used in GSMConfig.
 #include <assert.h>				// pat added
 #include <stdarg.h>				// pat added
 #include <time.h>				// pat added.
 #include <sys/time.h>
 #include <sys/types.h>
-#include <wait.h>
+//#include <wait.h>
 #include "miniggsn.h"
 #undef NCC	// Make sure.  This is defined in ioctl.h, but used as a name in GSMConfig.h.
 #include "Ggsn.h"
@@ -258,7 +258,7 @@ static bool verbose = true;
 
 static char *packettoa(char *result,unsigned char *packet, int len)
 {
-	struct iphdr *iph = (struct iphdr*)packet;
+/*	struct iphdr *iph = (struct iphdr*)packet;
 	char nbuf1[40], nbuf2[40];
 	if (verbose && iph->protocol == IPPROTO_TCP) {
 		struct tcphdr *tcph = (struct tcphdr*) (packet + 4 * iph->ihl);
@@ -280,7 +280,7 @@ static char *packettoa(char *result,unsigned char *packet, int len)
 			ip_ntoa(iph->saddr,nbuf1),
 			ip_ntoa(iph->daddr,nbuf2));
 	}
-	return result;
+*/	return result;
 }
 
 
@@ -315,7 +315,7 @@ unsigned char *miniggsn_rcv_npdu(int *plen, uint32_t *dstaddr)
 		//*error = ret;	// huh?
 		return NULL;
 	} else {
-		struct iphdr *iph = (struct iphdr*)recvbuf;
+		struct ip *iph = (struct ip*)recvbuf;
 		{
 			char infobuf[200];
 			MGINFO("ggsn: received %s at %s",packettoa(infobuf,recvbuf,ret), timestr().c_str());
@@ -325,7 +325,7 @@ unsigned char *miniggsn_rcv_npdu(int *plen, uint32_t *dstaddr)
 				//ip_ntoa(iph->daddr,NULL), timestr());
 		}
 
-		*dstaddr = iph->daddr;
+        *dstaddr = iph->ip_dst.s_addr;//iph->daddr;
 		// TODO: Do we have to allocate a new buffer?
 		*plen = ret;
 		// Zero terminate for the convenience of the pinger.
@@ -341,9 +341,9 @@ unsigned char *miniggsn_rcv_npdu(int *plen, uint32_t *dstaddr)
 // Update 3-2012: Always do the check to print messages for dup packets even if not discarded.
 static int mg_toss_dup_packet(mg_con_t*mgp,unsigned char *packet, int packetlen)
 {
-	struct iphdr *iph = (struct iphdr*)packet;
-	if (iph->protocol != IPPROTO_TCP) { return 0; }
-	struct tcphdr *tcph = (struct tcphdr*) (packet + 4 * iph->ihl);
+	struct ip *iph = (struct ip*)packet;
+	if (iph->ip_p != IPPROTO_TCP) { return 0; }
+/*	struct tcphdr *tcph = (struct tcphdr*) (packet + 4 * iph->ihl);
 	if (tcph->rst | tcph->urg) { return 0; }
 	int i;
 	for (i = 0; i < MG_PACKET_HISTORY; i++) {
@@ -379,7 +379,7 @@ static int mg_toss_dup_packet(mg_con_t*mgp,unsigned char *packet, int packetlen)
 	mgp->mg_packets[i].seq = tcph->seq;
 	mgp->mg_packets[i].source = tcph->source;
 	mgp->mg_packets[i].dest = tcph->dest;
-	return 0;	// Do not toss.
+*/	return 0;	// Do not toss.
 }
 
 // There is data available on the socket.  Go get it.
@@ -411,7 +411,7 @@ void miniggsn_handle_read()
 int miniggsn_snd_npdu_by_mgc(mg_con_t *mgp,unsigned char *npdu, unsigned len)
 {
     // Verify the IP header.
-    struct iphdr *ipheader = (struct iphdr*)npdu;
+/*    struct iphdr *ipheader = (struct iphdr*)npdu;
     // The return address must be the MS itself.
     uint32_t ms_ip_address = mgp->mg_ip;
     uint32_t packet_source_ip_addr = ipheader->saddr;
@@ -470,7 +470,7 @@ int miniggsn_snd_npdu_by_mgc(mg_con_t *mgp,unsigned char *npdu, unsigned len)
 	if (result != (int) len) {
 		MGERROR("ggsn: error: write(tun_fd,%d) result=%d %s",len,result,strerror(errno));
 	}
-    return 0;
+*/    return 0;
 }
 
 #if 0 // not needed

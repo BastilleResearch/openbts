@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <iostream>
 
 #include "Resampler.h"
@@ -66,8 +66,10 @@ bool Resampler::initFilters(float bw)
 	}
 
 	for (size_t i = 0; i < p; i++) {
-		partitions[i] = (float *)
-				memalign(16, filt_len * 2 * sizeof(float));
+        void *p;
+        if (posix_memalign(&p, 16, filt_len * 2 * sizeof(float)) != 0)
+            return false;
+        partitions[i] = (float *)p;
 	}
 
 	/* 

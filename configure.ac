@@ -104,10 +104,10 @@ AM_CONDITIONAL(UHD, [test "x$with_uhd" = "xyes"])
 AM_CONDITIONAL(USRP1, [test "x$with_usrp1" = "xyes"])
 
 dnl Check for libzmq
-if test ! -r "/usr/include/zmq.h" -a ! -r "/usr/local/include/zmq.h"; then
+if test ! -r "/usr/include/zmq.h" -a ! -r "/usr/local/include/zmq.h" -a ! -r "/opt/local/include/zmq.h"; then
     AC_MSG_ERROR([/usr/local/include/zmq.h not found. Install the libzmq3-dev package manually or run $ sudo ./NodeManager/install_libzmq.sh])
 fi
-if test ! -r "/usr/include/zmq.hpp" -a ! -r "/usr/local/include/zmq.hpp"; then
+if test ! -r "/usr/include/zmq.hpp" -a ! -r "/usr/local/include/zmq.hpp" -a ! -r "/opt/local/include/zmq.hpp"; then
     AC_MSG_ERROR([/usr/local/include/zmq.hpp not found. Install the libzmq3-dev package manually or run $ sudo ./NodeManager/install_libzmq.sh])
 fi
 AC_CHECK_LIB(zmq, zmq_init, ,[AC_MSG_ERROR([Cannot link with -lzmq. Install the libzmq3-dev package manually or run $ sudo ./NodeManager/install_libzmq.sh])])
@@ -118,14 +118,16 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <zmq.h>],
                [AC_MSG_ERROR([no. Install the libzmq3-dev package manually or run $ sudo ./NodeManager/install_libzmq.sh])])
 
 dnl Check for liba53
-if test ! -r "/usr/include/a53.h" -a ! -r "/usr/local/include/a53.h"; then
+if test ! -r "/usr/include/a53.h" -a ! -r "/usr/local/include/a53.h" -a ! -r "/opt/local/include/a53.h"; then
     AC_MSG_ERROR([/usr/include/a53.h not found. Install the liba53 package or manually build and install with $ sudo ./tools/install_liba53.sh])
 fi
-AC_CHECK_LIB(a53, _init, ,[AC_MSG_ERROR([Cannot link with -la53. Install the liba53 package or manually build and install with $ sudo ./tools/install_liba53.sh])])
+# AC_CHECK_LIB(a53, _init, ,[AC_MSG_ERROR([Cannot link with -la53. Install the liba53 package or manually build and install with $ sudo ./tools/install_liba53.sh])])
+# FIXME: C or C++ lib?
+# AC_CHECK_LIB(a53, _init, ,[AC_MSG_ERROR([Cannot link with -la53. Install the liba53 package or manually build and install with $ sudo ./tools/install_liba53.sh])])
 
 dnl Check for sip+rtp libs
 AC_MSG_CHECKING([ortp api version])
-AS_IF([gcc -I=/usr/local/include -o config/test_ortp_version config/test_ortp_version.cpp -lortp &> /dev/null], [
+AS_IF([gcc -I=/usr/local/include -I/opt/local/include -L/opt/local/lib -o config/test_ortp_version config/test_ortp_version.cpp -lortp &> /dev/null], [
 	AC_DEFINE(ORTP_NEW_API, 1, rtp_session_set_local_addr takes four arguments)
 	AC_MSG_RESULT([>= 0.22.0])
 	],

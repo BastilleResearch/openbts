@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <malloc.h>
+//#include <malloc.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -707,7 +707,9 @@ int base_convolve_complex(float *x, int x_len,
 void *convolve_h_alloc(int len)
 {
 #ifdef HAVE_SSE3
-	return memalign(16, len * 2 * sizeof(float));
+    void *p = NULL;
+    posix_memalign(&p, 16, len * 2 * sizeof(float));
+    return p;
 #else
 	return malloc(len * 2 * sizeof(float));
 #endif

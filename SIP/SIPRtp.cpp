@@ -125,7 +125,7 @@ void SipRtp::initRTP1(const char *d_ip_addr, unsigned d_port, unsigned dialogId)
 	rtp_session_set_payload_type(mSession, 3);
 	// (pat added) The last argument is user payload data that is passed to ourRtpTimestampJumpCallback()
 	// I was going to use the dialogId but decided to look up the dialog by mSession.
-	rtp_session_signal_connect(mSession,"timestamp_jump",(RtpCallback)ourRtpTimestampJumpCallback,dialogId);
+	rtp_session_signal_connect(mSession,"timestamp_jump",(RtpCallback)ourRtpTimestampJumpCallback,(void*)dialogId);
 
 	gCountRtpSockets++;
 #ifdef ORTP_NEW_API
